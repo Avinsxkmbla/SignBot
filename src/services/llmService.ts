@@ -6,7 +6,7 @@
 
 export class LLMService {
   private apiKey: string = 'AIzaSyB5c1j12FEGYeY9XI88hKf43MhNtActhvs';
-  private modelName: string = 'gemini-1.5-pro-latest';
+  private modelName: string = 'gemini-2.5-pro-latest';
   private genAI: any;
   private model: any;
 
