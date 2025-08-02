@@ -65,12 +65,14 @@ export const MotionDetectionOverlay: React.FC<MotionDetectionOverlayProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Ensure canvas dimensions are set
+    if (canvas.width === 0 || canvas.height === 0) {
+      canvas.width = overlayDimensions.width || 640;
+      canvas.height = overlayDimensions.height || 480;
+    }
+
     // Clear previous frame
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Set up canvas dimensions to match video
-    canvas.width = overlayDimensions.width;
-    canvas.height = overlayDimensions.height;
 
     // Generate simulated hand landmarks for demonstration
     const handLandmarks = generateSimulatedLandmarks(canvas.width, canvas.height);
@@ -112,6 +114,10 @@ export const MotionDetectionOverlay: React.FC<MotionDetectionOverlayProps> = ({
   const generateSimulatedLandmarks = (width: number, height: number): HandLandmarks => {
     // Simulate hand landmarks (21 points for a hand)
     const landmarks: TrackingPoint[] = [];
+    
+    if (width === 0 || height === 0) {
+      width = 640; height = 480;
+    }
     const centerX = width * 0.5;
     const centerY = height * 0.5;
     

@@ -3,11 +3,18 @@ import { GestureData } from '../types';
 
 class GestureRecognitionService {
   private model: tf.LayersModel | null = null;
-  private isInitialized = false;
+  private initialized = false;
+  private initializationPromise: Promise<void> | null = null;
 
   async initialize(): Promise<void> {
-    if (this.isInitialized) return;
+    if (this.initialized) return;
+    if (this.initializationPromise) return this.initializationPromise;
 
+    this.initializationPromise = this.doInitialize();
+    return this.initializationPromise;
+  }
+
+  private async doInitialize(): Promise<void> {
     try {
       // Initialize TensorFlow.js
       await tf.ready();
@@ -15,11 +22,16 @@ class GestureRecognitionService {
       // For demo purposes, we'll simulate a gesture recognition model
       // In production, you would load a trained sign language recognition model
       this.model = await this.createDemoModel();
-      this.isInitialized = true;
+      this.initialized = true;
     } catch (error) {
       console.error('Failed to initialize gesture recognition:', error);
+      this.initializationPromise = null;
       throw error;
     }
+  }
+
+  isInitialized(): boolean {
+    return this.initialized;
   }
 
   private async createDemoModel(): Promise<tf.LayersModel> {
@@ -43,7 +55,7 @@ class GestureRecognitionService {
   }
 
   async processFrame(videoElement: HTMLVideoElement): Promise<GestureData | null> {
-    if (!this.isInitialized || !this.model) {
+    if (!this.initialized || !this.model) {
       throw new Error('Gesture recognition not initialized');
     }
 
@@ -61,7 +73,7 @@ class GestureRecognitionService {
       
       return {
         landmarks,
-        confidence: Math.random() * 0.3 + 0.7, // Simulate 70-100% confidence
+        confidence: Math.random() * 0.4 + 0.6, // Simulate 60-100% confidence
         gesture
       };
     } catch (error) {

@@ -18,12 +18,14 @@ function App() {
   useEffect(() => {
     const latestMessage = messages[messages.length - 1];
     
-    if (latestMessage && latestMessage.type === 'user' && !isProcessing) {
+    if (latestMessage && latestMessage.type === 'user' && !isProcessing && messages.length > 0) {
       handleUserMessage(latestMessage.content);
     }
-  }, [messages]);
+  }, [messages, isProcessing]);
 
   const handleUserMessage = async (userInput: string) => {
+    if (isProcessing) return;
+    
     setIsProcessing(true);
     
     try {
@@ -43,7 +45,7 @@ function App() {
       setTimeout(() => {
         setIsAvatarAnimating(false);
         setCurrentResponse('');
-      }, response.split(' ').length * 600 + 1000); // ~600ms per word + 1s buffer
+      }, Math.max(response.split(' ').length * 600 + 1000, 2000)); // Minimum 2s animation
       
     } catch (error) {
       console.error('Error processing user message:', error);

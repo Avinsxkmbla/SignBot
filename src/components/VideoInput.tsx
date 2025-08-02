@@ -12,6 +12,7 @@ export const VideoInput: React.FC = () => {
   const [gestureQueue, setGestureQueue] = useState<string[]>([]);
   const [trackingData, setTrackingData] = useState<any>(null);
   const [isVideoReady, setIsVideoReady] = useState(false);
+  const [gestureRecognitionReady, setGestureRecognitionReady] = useState(false);
   
   const {
     isRecording,
@@ -28,9 +29,11 @@ export const VideoInput: React.FC = () => {
     const initialize = async () => {
       try {
         await gestureRecognitionService.initialize();
+        setGestureRecognitionReady(true);
       } catch (err) {
         console.error('Failed to initialize gesture recognition:', err);
         setError('Failed to initialize gesture recognition system');
+        setGestureRecognitionReady(false);
       }
     };
     initialize();
@@ -76,6 +79,11 @@ export const VideoInput: React.FC = () => {
         return; // Stop processing if conditions are not met
       }
 
+      if (!gestureRecognitionService.isInitialized()) {
+        animationFrameId = requestAnimationFrame(processFrame);
+        return;
+      }
+
       try {
         const gestureData = await gestureRecognitionService.processFrame(videoRef.current);
         
@@ -110,7 +118,7 @@ export const VideoInput: React.FC = () => {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [isRecording, isVideoReady, setCurrentGesture]); // Dependencies that control the loop
+  }, [isRecording, isVideoReady, gestureRecognitionReady, setCurrentGesture]); // Dependencies that control the loop
 
   const startCamera = async () => {
     if (stream) return; // Don't re-initialize if stream already exists
@@ -292,7 +300,7 @@ export const VideoInput: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={startRecording}
-            disabled={!gestureRecognitionService.isInitialized()}
+            disabled={!gestureRecognitionReady}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             <Camera size={18} />
@@ -314,6 +322,13 @@ export const VideoInput: React.FC = () => {
           <button onClick={stopCamera} className="text-sm text-gray-500 hover:text-gray-700">
             Turn off camera
           </button>
+        )}
+
+        {!gestureRecognitionReady && (
+          <div className="flex items-center gap-2 text-sm text-yellow-600">
+            <Loader2 size={16} className="animate-spin" />
+            <span>Initializing gesture recognition...</span>
+          </div>
         )}
 
         {gestureQueue.length > 0 && !isRecording && (

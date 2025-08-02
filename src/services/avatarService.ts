@@ -16,9 +16,21 @@ export class AvatarService {
   private setupCanvas() {
     if (!this.canvas || !this.ctx) return;
 
+    // Get the actual display size
+    const rect = this.canvas.getBoundingClientRect();
+    
+    // Ensure we have valid dimensions
+    if (rect.width === 0 || rect.height === 0) {
+      // Fallback dimensions
+      this.canvas.width = 400;
+      this.canvas.height = 400;
+      this.canvas.style.width = '400px';
+      this.canvas.style.height = '400px';
+      return;
+    }
+
     // Set up high DPI canvas
     const dpr = window.devicePixelRatio || 1;
-    const rect = this.canvas.getBoundingClientRect();
     
     this.canvas.width = rect.width * dpr;
     this.canvas.height = rect.height * dpr;

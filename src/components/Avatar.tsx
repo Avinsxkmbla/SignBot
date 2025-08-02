@@ -14,10 +14,20 @@ export const Avatar: React.FC<AvatarProps> = ({ isAnimating, currentText }) => {
     if (canvasRef.current) {
       avatarService.initialize(canvasRef.current);
     }
+    
+    // Handle canvas resize
+    const handleResize = () => {
+      if (canvasRef.current) {
+        avatarService.initialize(canvasRef.current);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
-    if (currentText && isAnimating) {
+    if (currentText && isAnimating && canvasRef.current) {
       avatarService.animateText(currentText);
     }
   }, [currentText, isAnimating]);
